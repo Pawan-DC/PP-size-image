@@ -13,31 +13,62 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e7f3f8;
+            background: linear-gradient(135deg, #3e8e41, #2c7b9b);
+            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            color: #333;
+            overflow: hidden;
         }
 
+        /* Upper Text Section with Parallax Effect */
+        .upper-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 80px 20px;
+            background: url('https://via.placeholder.com/1920x400?text=Passport+Photo+Generator') center/cover no-repeat;
+            background-attachment: fixed;
+            color: #fff;
+            font-size: 40px;
+            font-weight: 700;
+            text-align: center;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .upper-text span {
+            color: #4CAF50;
+        }
+
+        /* Main Container */
         .container {
             width: 90%;
             max-width: 900px;
             background-color: #ffffff;
             padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
             position: relative;
+            z-index: 10;
+            text-align: center;
+            margin-top: 120px;
         }
 
         h1 {
             font-size: 36px;
             color: #2C7B9B;
-            margin-bottom: 20px;
+            margin-top: 20px;
             font-weight: 700;
+            transition: transform 0.5s ease;
+        }
+
+        h1:hover {
+            transform: scale(1.1);
         }
 
         p {
@@ -55,7 +86,7 @@
             font-size: 16px;
             background-color: #f8f8f8;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.3s ease;
         }
 
         input[type="file"]:hover {
@@ -69,9 +100,9 @@
             height: auto;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            position: relative;
         }
 
+        /* Button Styling */
         .buttons {
             margin-top: 40px;
             display: flex;
@@ -86,35 +117,24 @@
             cursor: pointer;
             border-radius: 25px;
             border: none;
-            background-color: #2C7B9B;
+            background-color: #4CAF50;
             color: white;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
 
         .buttons button:hover {
-            background-color: #1d6b8e;
+            background-color: #45a049;
+            transform: translateY(-3px);
         }
 
         .buttons .download-btn {
-            background-color: #1E88E5;
+            background-color: #2196F3;
         }
 
         .buttons .download-btn:hover {
-            background-color: #1976D2;
-        }
-
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
-        }
-
-        .loading span {
-            font-size: 20px;
-            color: #2C7B9B;
+            background-color: #1e88e5;
+            transform: translateY(-3px);
         }
 
         .footer {
@@ -126,45 +146,28 @@
         .footer a {
             color: #2196F3;
             text-decoration: none;
+            font-weight: bold;
         }
 
         .footer a:hover {
             text-decoration: underline;
         }
 
-        .brand-logo {
-            font-size: 40px;
-            font-weight: bold;
-            color: #2C7B9B;
-            letter-spacing: 5px;
-            margin-bottom: 30px;
-        }
-
-        .brand-logo span {
-            color: #2196F3;
-        }
-
     </style>
 </head>
 <body>
 
+<div class="upper-text">
+    Passport Photo Generator
+    <br>
+    <span>Instantly generate your perfect passport photo with ease</span>
+</div>
+
 <div class="container">
-    <div class="brand-logo">
-        IT<span>.</span>
-    </div>
-    <h1>Passport Photo Generator</h1>
-    <p>Upload your photo, adjust the background, and we will automatically adjust it to the perfect passport-size photo in HD quality.</p>
+    <h1>Upload Your Photo</h1>
+    <p>Upload your photo and get it automatically adjusted to the correct passport size in high definition.</p>
 
-    <!-- Upload Button with Tooltip -->
-    <label for="upload" title="Click to upload your photo" class="upload-label">
-        <input type="file" id="upload" accept="image/*">
-    </label>
-
-    <div class="loading">
-        <span>Processing...</span>
-    </div>
-
-    <!-- Canvas to display image -->
+    <input type="file" id="upload" accept="image/*">
     <canvas id="canvas" width="600" height="600"></canvas>
 
     <div class="buttons">
@@ -172,7 +175,6 @@
         <button class="download-btn" id="downloadBtn">Download Photo</button>
     </div>
 
-    <!-- Footer -->
     <div class="footer">
         <p>Made with ❤️ by <a href="https://www.example.com" target="_blank">IT</a></p>
     </div>
@@ -184,33 +186,22 @@
     const ctx = canvas.getContext('2d');
     const enhanceBtn = document.getElementById('enhanceBtn');
     const downloadBtn = document.getElementById('downloadBtn');
-    const loadingIndicator = document.querySelector('.loading');
 
     let img = null;
 
     // Handle Image Upload
     uploadInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
-
         if (!file) return;
-        
-        const allowedTypes = ['image/jpeg', 'image/png'];
-        if (!allowedTypes.includes(file.type)) {
-            alert('Please upload a valid image file (JPEG/PNG).');
-            return;
-        }
 
-        loadingIndicator.style.display = 'block'; // Show loading spinner
         const reader = new FileReader();
-
         reader.onload = function(e) {
             img = new Image();
             img.onload = function() {
                 adjustAndDrawImage();
-                loadingIndicator.style.display = 'none'; // Hide loading spinner after image load
-            };
+            }
             img.src = e.target.result;
-        };
+        }
         reader.readAsDataURL(file);
     });
 
@@ -218,7 +209,6 @@
     function adjustAndDrawImage() {
         if (!img) return;
 
-        // Scale the image to fit within the 600x600 frame (passport photo size)
         const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
         const x = (canvas.width / 2) - (img.width / 2) * scale;
         const y = (canvas.height / 2) - (img.height / 2) * scale;
@@ -231,21 +221,15 @@
     enhanceBtn.addEventListener('click', function() {
         if (!img) return;
 
-        loadingIndicator.style.display = 'block'; // Show loading spinner
-
-        // Apply auto enhancements (simple contrast/brightness filter)
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.filter = "contrast(1.2) brightness(1.1)"; // Enhance contrast and brightness
+        ctx.filter = "contrast(1.2) brightness(1.1)";
         adjustAndDrawImage();
-        
-        loadingIndicator.style.display = 'none'; // Hide loading spinner after enhancing
     });
 
     // Download the Passport Photo
     downloadBtn.addEventListener('click', function() {
         if (!img) return;
 
-        // Ensure the canvas content is downloaded properly
         const dataUrl = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = dataUrl;
